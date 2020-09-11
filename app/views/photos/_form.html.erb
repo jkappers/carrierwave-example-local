@@ -13,10 +13,40 @@
 
   <div class="field">
     <%= form.label :upload %>
-    <%= form.text_field :upload %>
+    <%= form.file_field :upload %>
   </div>
 
   <div class="actions">
     <%= form.submit %>
   </div>
 <% end %>
+
+
+<script>
+  const toBase64 = file => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+  });
+  
+  const form = document.querySelector('form');
+  const input = document.querySelector('[type=file]');
+
+  function createPhoto(data) {
+    fetch('/photos', {
+      method: 'post',
+      body: data
+    }).then(function(response) {
+      return response.json();
+    })
+  }
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const data = new FormData(form)
+    data.append("upload", await toBase64(input.files[0]))
+    createPhoto(data)
+    return false;
+  });
+</script>
